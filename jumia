@@ -1,0 +1,32 @@
+from playwright.sync_api import sync_playwright
+import pandas as pd
+
+# Start Playwright
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)  # Set to False if you want to see the browser
+    page = browser.new_page()
+
+    # Open Jumia Laptops page
+    url = "https://www.jumia.co.ke/laptops/"  # Update this URL if needed
+    page.goto(url)
+
+    # Extract laptop names & prices
+    products = page.locator("article").all()
+    data = []
+
+    for product in products:
+        try:
+            name = product.locator("h3.name").inner_text()
+            price = product.locator("div.prc").inner_text()
+            data.append({"Laptop Name": name, "Price": price})
+        except:
+            pass  # Ignore products without complete details
+
+    # Convert to DataFrame & Save to Excel
+    df = pd.DataFrame(data)
+    df.to_excel("jumia_laptops.xlsx", index=False)
+
+    print("✅ Scraping complete! Data saved to 'jumia_laptops.xlsx'")
+
+    # Close browser
+    browser.close()

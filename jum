@@ -1,0 +1,42 @@
+from playwright.sync_api import sync_playwright
+import pandas as pd
+
+# Start Playwright
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)  # Set to False if you want to see the browser
+    page = browser.new_page()
+
+    # Open Jumia Laptops page
+    url = "https://www.jumia.co.ke/laptops/"  # Update this URL if needed
+    page.goto(url)
+
+    # Extract laptop names & prices
+    products = page.locator("article").all()
+    data = []
+
+    for product in products:
+        try:
+            name = product.locator("h3.name").inner_text()
+            price = product.locator("div.prc").inner_text()
+            data.append({"Laptop Name": name, "Price": price})
+        except:
+            pass  # Ignore products without complete details
+
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+
+    # Save to Excel with auto-adjusted columns
+    with pd.ExcelWriter("jumia_laptops.xlsx", engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Laptops")
+        worksheet = writer.sheets["Laptops"]
+
+        # Auto-adjust column width
+        for col in worksheet.columns:
+            max_length = max(len(str(cell.value)) for cell in col) + 2  # Add padding
+            col_letter = col[0].column_letter  # Get column letter
+            worksheet.column_dimensions[col_letter].width = max_length
+
+    print("✅ Scraping complete! Data saved to 'jumia_laptops.xlsx' with auto-adjusted columns.")
+
+    # Close browser
+    browser.close()
