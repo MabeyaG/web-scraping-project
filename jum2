@@ -3,7 +3,7 @@ import pandas as pd
 
 # Start Playwright
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False)  # 👀 Set to True for silent mode
+    browser = p.chromium.launch(headless=False)  # Set to True for silent mode
     page = browser.new_page()
 
     # Open Jumia Laptops page (Loads faster)
@@ -14,7 +14,7 @@ with sync_playwright() as p:
     products = page.locator("article").all()
     data = []
 
-    print(f"🔄 Found {len(products)} laptops. Scraping...")
+    print(f" Found {len(products)} laptops. Scraping...")
 
     for idx, product in enumerate(products, start=1):
         try:
@@ -22,10 +22,10 @@ with sync_playwright() as p:
             price = product.locator("div.prc").inner_text()
             data.append({"Laptop Name": name, "Price": price})
 
-            print(f"✅ Scraped {idx}/{len(products)}: {name} - {price}")
+            print(f" Scraped {idx}/{len(products)}: {name} - {price}")
 
         except Exception as e:
-            print(f"❌ Skipped a product due to error: {e}")  # Shows any issue
+            print(f" Skipped a product due to error: {e}")  # Shows any issue
 
     # Convert to DataFrame
     df = pd.DataFrame(data)
@@ -41,7 +41,7 @@ with sync_playwright() as p:
             col_letter = col[0].column_letter  # Get column letter
             worksheet.column_dimensions[col_letter].width = max_length
 
-    print("🎉 Scraping complete! Data saved to 'jumia_laptops.xlsx' ✅")
+    print(" Scraping complete! Data saved to 'jumia_laptops.xlsx' ")
 
     # Close browser
     browser.close()
